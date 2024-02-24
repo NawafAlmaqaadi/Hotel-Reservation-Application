@@ -1,9 +1,6 @@
 package service;
 
-import model.Customer;
-import model.IRoom;
-import model.Reservation;
-import model.Room;
+import model.*;
 
 import java.util.*;
 
@@ -22,11 +19,12 @@ public class ReservationService {
         for (IRoom roomValidation : rooms) {
             if (roomValidation.getRoomNumber().equals(room.getRoomNumber())) {
                 System.out.println("Room number already added, please enter another room number");
-                vaildate=false;
+                vaildate = false;
             }
-            }
-        if(vaildate){
+        }
+        if (vaildate) {
             rooms.add(room);
+            availableRooms.add(room);
             System.out.println("Added Successfully ");
 
         }
@@ -46,10 +44,37 @@ public class ReservationService {
     }
 
     public Reservation reserveARooms(Customer customer, IRoom room, Date checkInDate, Date checkOutDate) {
-
         Reservation newReservation = new Reservation(customer, room, checkInDate, checkOutDate);
-        reservations.add(newReservation);
-        System.out.println("Reserved successfully !");
+
+        if(reservations.isEmpty()){
+            reservations.add(newReservation);
+            System.out.println("Reserved successfully !");
+
+        }else{
+            for (Reservation reserved : reservations) {
+                if (((checkInDate.after(reserved.getCheckOutDate())) || (checkInDate.before(reserved.getCheckInDate()))) &&
+                        ((checkOutDate.after(reserved.getCheckOutDate())) || checkOutDate.before(reserved.getCheckInDate()))) {
+
+
+                    reservations.add(newReservation);
+                    System.out.println("Reservation information");
+                    System.out.println("Customer name: "+ newReservation.getCustomer().getFirstName() + " " + newReservation.getCustomer().getLastName());
+                    System.out.println("Room number: "+ newReservation.getRoom().getRoomNumber());
+                    System.out.println("Room type: "+ newReservation.getRoom().getRoomType());
+                    System.out.println("Check In Date : "+ newReservation.getCheckInDate());
+                    System.out.println("Check In Date : "+ newReservation.getCheckOutDate());
+                    System.out.println("--------------------------------------------------------");
+                    System.out.println("Total price: "+ newReservation.getRoom().getRoomPrice());
+                    System.out.println("--------------------------------------------------------");
+
+                    System.out.println("Reserved successfully !");
+
+
+
+                }
+            }
+        }
+
 
 
         return newReservation;
@@ -57,23 +82,33 @@ public class ReservationService {
     }
 
     public Collection<IRoom> findRooms(Date checkInDate, Date checkOutDate) {
+        List<IRoom> availableRooms = new ArrayList<>();
 
-
-        for (Reservation reserved : reservations) {
-            System.out.println(reserved.getCheckInDate() + " reserved checkIn");
-            System.out.println(reserved.getCheckOutDate() + " reserved checkout ");
-
-            System.out.println(checkInDate + " looking for checkIn");
-            System.out.println(checkOutDate + " looking for checkout");
-            if (((checkInDate.after(reserved.getCheckOutDate())) || (checkInDate.before(reserved.getCheckInDate()))) &&
-                    ((checkOutDate.after(reserved.getCheckOutDate())) || checkOutDate.before(reserved.getCheckInDate()))) {
-                availableRooms.add(reserved.getRoom());
+        if (rooms.isEmpty()) {
+            System.out.println("No rooms available");
+        } else {
+            boolean roomAvailable;
+            for (IRoom room : rooms) {
+                roomAvailable = true;
+                for (Reservation reserved : reservations) {
+                    if (room.equals(reserved.getRoom()) &&
+                            !((checkOutDate.before(reserved.getCheckInDate())) ||
+                                    (checkInDate.after(reserved.getCheckOutDate())))) {
+                        roomAvailable = false;
+                        break; // Room is reserved for the requested dates
+                    }
+                }
+                if (roomAvailable) {
+                    availableRooms.add(room);
+                }
             }
         }
 
+        System.out.println("Available rooms: ");
         for (IRoom freeRooms : availableRooms) {
-            System.out.println(availableRooms);
+            System.out.println(freeRooms);
         }
+
         return availableRooms;
     }
 
@@ -81,6 +116,7 @@ public class ReservationService {
     public Collection<Reservation> getCustomerReservation(Customer customer) {
         for (Reservation reserved : reservations) {
             if (customer.getEmail().equals(reserved.getCustomer().getEmail())) {
+                System.out.println(reserved);
                 return reservations;
             }
             }
@@ -105,5 +141,15 @@ public class ReservationService {
                 }
         return rooms;
         }
+
+    public boolean roomExists(String roomNumber) {
+        for (IRoom room : rooms) {
+            if (room.getRoomNumber().equals(roomNumber)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     }
 

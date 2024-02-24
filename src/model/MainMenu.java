@@ -5,9 +5,12 @@ import service.ReservationService;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static model.RoomType.Single;
 
@@ -18,9 +21,6 @@ public class MainMenu {
         Scanner input = new Scanner(System.in);
         CustomerService customerService = new CustomerService();
         ReservationService reservationService = new ReservationService();
-        customerService.addCustomer("nawaf@gmail.com","Nawaf","Yaseen");
-        Customer newCustomer = new Customer("nawaf","Yaseen","nawaf@gmail.com");
-
 
         int exitKey = 0;
 
@@ -39,81 +39,119 @@ public class MainMenu {
 
     System.out.print("Please select a number for the menu option: ");
 
-    exitKey = input.nextInt();
+            exitKey = input.nextInt();
 
-    if(exitKey == 1){
+            switch(exitKey) {
+                case 1:
+                    System.out.println("Find and reserve a room");
 
-        System.out.println("Find a room");
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                    try {
+                        System.out.println("Enter CheckIn Date dd/mm/yyyy");
+                        String checkInDateString = input.next();
+                        System.out.println("Enter CheckOut Date dd/mm/yyyy");
+                        String checkOutDateString = input.next();
 
-        String searchForCheckInDate2 = input.next();
-        String searchForCheckOutDate2 = input.next();
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-        try {
-            Date CheckInDate = sdf.parse(searchForCheckInDate2);
-            Date CheckOutDate = sdf.parse(searchForCheckOutDate2);
-            reservationService.findRooms(CheckInDate,CheckOutDate);
+                        String[] checkInDate = checkInDateString.split("/");
+                        String[] checkOutDate = checkOutDateString.split("/");
 
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
+                        Date checkInDateValidated = returnDate(checkInDate[0], (checkInDate[1]), checkInDate[2]);
+                        Date checkOutDateValidated = returnDate(checkOutDate[0], checkOutDate[1], checkOutDate[2]);
+                        reservationService.findRooms(checkInDateValidated, checkOutDateValidated);
+
+                        System.out.println("Would you like to book a room? y/n");
+                        String qBook = input.next();
+
+                        if (qBook.equalsIgnoreCase("y")) {
+                            System.out.println("Do you have an account with us y/n?");
+                            String qAccount = input.next();
+                            if (qAccount.equalsIgnoreCase("y")) {
+                                System.out.println("Enter Email format: name@domain.com");
+                                String email = input.next();
+                                if (customerService.customerExists(email)) {
+                                    System.out.println("what room number would you like to reserve");
+                                    String roomNumber = input.next();
+                                    if (reservationService.roomExists(roomNumber)) {
+                                        reservationService.reserveARooms(customerService.getCustomer(email), reservationService.getARoom(roomNumber), checkInDateValidated, checkOutDateValidated);
+                                    } else {
+                                        System.out.println("Room number is invalid.");
+                                    }
+                                } else {
+                                    System.out.println("Account not registered.");
+                                }
+                            } else if (qAccount.equalsIgnoreCase("n")) {
+                                System.out.println("Please create an account");
+                                createAccount(input, customerService);
+                            } else {
+                                System.out.println("Invalid input for account question.");
+                            }
+                        }
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        System.out.println("Invalid Date format! Please use dd/mm/yyyy format.");
+                    } catch (ParseException e) {
+                        System.out.println("Invalid Date format! Please use dd/mm/yyyy format.");
+                    }
+                    break;
+                case 2:
+                    System.out.println("Please write your registered mail");
+                    String getCustomerReservationEmail = input.next();
+                    reservationService.getCustomerReservation(customerService.getCustomer(getCustomerReservationEmail));
+                    break;
+
+                case 3:
+                    createAccount(input, customerService);
+                    break;
+
+                case 4:
+                    AdminMenu.Menu();
+                    break;
+
+                default:
+                    System.out.println("Invalid option!");
+                    break;
+            }
+
+        } while (exitKey <= 4);
+
+    }
+    public static Date returnDate (String year, String month, String day) throws ParseException {
+
+
+        return new SimpleDateFormat("dd/MM/yyyy").parse(year+"/"+month+"/"+day);
+    }
+
+    public static String validateEmail (String email, Scanner input){
+
+        String EMAIL_PATTERN =
+                "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@" +
+                        "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+        Pattern pattern = Pattern.compile(EMAIL_PATTERN);
+        Matcher matcher = pattern.matcher(email);
+        Matcher matcher2 = pattern.matcher(email);
+        while (!matcher.matches()) {
+            System.out.println("Enter Email format: name@domain.com");
+            email = input.nextLine();
+            matcher = pattern.matcher(email);
+
         }
+        return email;
 
-    } else if (exitKey == 2) {
+    }
 
-    }else if (exitKey == 3) {
+    public static void createAccount(Scanner input, CustomerService customerService){
 
 
         System.out.println("Enter Email format: name@domain.com");
-        String firstName = input.next();
-        String lastName = input.next();
         String email = input.next();
-
-
-    }else if (exitKey == 4) {
-        AdminMenu.Menu();
-
-    }
-
-        }while(exitKey <= 4);
-
-
-        reservationService.printAllReservation(); //CORRECT
-
-        System.out.println("----------------------");
-
-        System.out.println("----------------------");
-
-
-        System.out.println("Add a room");
-
-        Room newRoom = new Room("1",100.0,Single);
-        reservationService.addRoom(newRoom); //CORRECT
-        System.out.println("----------------------");
-
-        System.out.println("Reserve a room");
-
-        Date checkInDate = returnDate(2024, 2-1, 5);
-        Date checkOutDate = returnDate(2024, 2-1, 7);
-
-        reservationService.reserveARooms(newCustomer,newRoom,checkInDate, checkOutDate);
-        System.out.println(newRoom);
-        System.out.println("----------------------");
-
-        System.out.println("Get a room");
-        System.out.println(  reservationService.getARoom("1"));
-        System.out.println("----------------------");
+        email =validateEmail(email,input);
+        System.out.println("First Name");
+        String firstName = input.next();
+        System.out.println("Last Name");
+        String lastName = input.next();
+        customerService.addCustomer(email,firstName,lastName);
+        System.out.println("Added successfully");
 
 
 
-        System.out.println("Get customers reservation");
-        System.out.println(reservationService.getCustomerReservation(newCustomer));
-        System.out.println("Print all reservation ");
-        reservationService.printAllReservation();
-    }
-
-    public static Date returnDate (int year, int month, int day){
-        Calendar DateCalendar = Calendar.getInstance();
-        DateCalendar.set(year, month, day);
-
-        return DateCalendar.getTime();
     }
 }

@@ -24,7 +24,9 @@ public class AdminMenu {
             exitKey = input.nextInt();
 
             if(exitKey == 1){
+                System.out.println("All cutsomers");
                 adminResource.getAllCustomers();
+
             } else if (exitKey == 2) {
                 adminResource.getAllRooms();
 
@@ -33,8 +35,7 @@ public class AdminMenu {
             } else if (exitKey == 4) {
 
 
-
-
+            try {
 
 
                 String anotherRoom;
@@ -53,20 +54,22 @@ public class AdminMenu {
                     System.out.println("Would like to add another room y/n");
                     anotherRoom = input.next();
 
-                    while(!(anotherRoom.equals("y") || anotherRoom.equals("n"))){
+                    while(!(anotherRoom.equalsIgnoreCase("y") || anotherRoom.equalsIgnoreCase("n"))){
                         System.out.print("Please enter Y (Yes) or N (No) : ");
                         anotherRoom = input.next();
                     }
 
                 }while (anotherRoom.equals("y"));
-
+            }catch (Exception e){
+            System.out.println("Invalid data entered \n");
+            Menu();
+            }
 
 
 
             }
 
         }while(exitKey <= 4);
-
 
 
     }

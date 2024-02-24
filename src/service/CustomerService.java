@@ -29,8 +29,18 @@ public class CustomerService {
 
 
     public Collection<Customer> getAllCustomers(){
+
+        System.out.println(customers.values());
     return customers.values();
     }
 
-
+    public boolean customerExists(String email) {
+        // Iterate through the values of the customers map
+        for (Customer customer : customers.values()) {
+            if (customer.getEmail().equalsIgnoreCase(email)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
