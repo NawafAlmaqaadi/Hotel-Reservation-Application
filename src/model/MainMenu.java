@@ -16,104 +16,83 @@ import static model.RoomType.Single;
 
 public class MainMenu {
 
-    public static void main (String[] args){
+    public static void main(String[] args) {
 
         Scanner input = new Scanner(System.in);
         CustomerService customerService = new CustomerService();
         ReservationService reservationService = new ReservationService();
 
-        int exitKey = 0;
-
-
-        System.out.println("Welcome to the Hotel Reservation Application");
-
+        int exitKey;
 
         do {
-    System.out.println("___________________________________________");
-    System.out.println("1. Find and reserve a room");
-    System.out.println("2. See my reservations");
-    System.out.println("3. Create an account");
-    System.out.println("4. Admin");
-    System.out.println("5. Exit \n");
-    System.out.println("___________________________________________");
+            System.out.println("__________________________________________");
+            System.out.println("1. Find and reserve a room");
+            System.out.println("2. Get customer reservations");
+            System.out.println("3. Create an account");
+            System.out.println("4. Admin Menu");
+            System.out.println("5. Exit");
+            System.out.println("__________________________________________");
 
-    System.out.print("Please select a number for the menu option: ");
+            System.out.print("Please select a number for the menu option: ");
 
-            exitKey = input.nextInt();
+            try {
+                exitKey = input.nextInt();
 
-            switch(exitKey) {
-                case 1:
-                    System.out.println("Find and reserve a room");
+                switch (exitKey) {
+                    case 1:
+                        System.out.println("Find and reserve a room \n");
 
-                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-                    try {
-                        System.out.println("Enter CheckIn Date dd/mm/yyyy");
-                        String checkInDateString = input.next();
-                        System.out.println("Enter CheckOut Date dd/mm/yyyy");
-                        String checkOutDateString = input.next();
+                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                        try {
+                            System.out.println("Enter CheckIn Date dd/mm/yyyy");
+                            String checkInDateString = input.next();
+                            System.out.println("Enter CheckOut Date dd/mm/yyyy");
+                            String checkOutDateString = input.next();
 
-                        String[] checkInDate = checkInDateString.split("/");
-                        String[] checkOutDate = checkOutDateString.split("/");
+                            String[] checkInDate = checkInDateString.split("/");
+                            String[] checkOutDate = checkOutDateString.split("/");
 
-                        Date checkInDateValidated = returnDate(checkInDate[0], (checkInDate[1]), checkInDate[2]);
-                        Date checkOutDateValidated = returnDate(checkOutDate[0], checkOutDate[1], checkOutDate[2]);
-                        reservationService.findRooms(checkInDateValidated, checkOutDateValidated);
+                            Date checkInDateValidated = returnDate(checkInDate[0], (checkInDate[1]), checkInDate[2]);
+                            Date checkOutDateValidated = returnDate(checkOutDate[0], checkOutDate[1], checkOutDate[2]);
+                            reservationService.findRooms(checkInDateValidated, checkOutDateValidated);
 
-                        System.out.println("Would you like to book a room? y/n");
-                        String qBook = input.next();
 
-                        if (qBook.equalsIgnoreCase("y")) {
-                            System.out.println("Do you have an account with us y/n?");
-                            String qAccount = input.next();
-                            if (qAccount.equalsIgnoreCase("y")) {
-                                System.out.println("Enter Email format: name@domain.com");
-                                String email = input.next();
-                                if (customerService.customerExists(email)) {
-                                    System.out.println("what room number would you like to reserve");
-                                    String roomNumber = input.next();
-                                    if (reservationService.roomExists(roomNumber)) {
-                                        reservationService.reserveARooms(customerService.getCustomer(email), reservationService.getARoom(roomNumber), checkInDateValidated, checkOutDateValidated);
-                                    } else {
-                                        System.out.println("Room number is invalid.");
-                                    }
-                                } else {
-                                    System.out.println("Account not registered.");
-                                }
-                            } else if (qAccount.equalsIgnoreCase("n")) {
-                                System.out.println("Please create an account");
-                                createAccount(input, customerService);
-                            } else {
-                                System.out.println("Invalid input for account question.");
-                            }
+
+
+                        } catch (ArrayIndexOutOfBoundsException | ParseException e) {
+                            System.out.println("Invalid Date format! Please use dd/mm/yyyy format. \n \n");
                         }
-                    } catch (ArrayIndexOutOfBoundsException e) {
-                        System.out.println("Invalid Date format! Please use dd/mm/yyyy format.");
-                    } catch (ParseException e) {
-                        System.out.println("Invalid Date format! Please use dd/mm/yyyy format.");
-                    }
-                    break;
-                case 2:
-                    System.out.println("Please write your registered mail");
-                    String getCustomerReservationEmail = input.next();
-                    reservationService.getCustomerReservation(customerService.getCustomer(getCustomerReservationEmail));
-                    break;
+                        break;
+                    case 2:
+                        System.out.println("Please write your registered mail");
+                        String getCustomerReservationEmail = input.next();
+                        reservationService.getCustomerReservation(customerService.getCustomer(getCustomerReservationEmail));
+                        break;
+                    case 3:
+                        createAccount(input, customerService);
+                        break;
+                    case 4:
+                        AdminMenu.Menu();
+                        break;
 
-                case 3:
-                    createAccount(input, customerService);
-                    break;
-
-                case 4:
-                    AdminMenu.Menu();
-                    break;
-
-                default:
-                    System.out.println("Invalid option!");
-                    break;
+                    case 5:
+                        System.out.println("Thanks , session ended ");
+                        break;
+                    default:
+                        System.out.println("Invalid option!");
+                        break;
+                }
+            } catch (Exception e) {
+                System.out.println("Invalid input! Please enter a number.");
+                input.nextLine(); // Clear the input buffer
+                exitKey = 0; // Reset the exitKey to trigger re-prompt
             }
 
-        } while (exitKey <= 4);
-
+        } while (exitKey != 5);
     }
+
+
+
     public static Date returnDate (String year, String month, String day) throws ParseException {
 
 
@@ -138,20 +117,20 @@ public class MainMenu {
 
     }
 
-    public static void createAccount(Scanner input, CustomerService customerService){
-
-
+    public static void createAccount(Scanner input, CustomerService customerService) {
         System.out.println("Enter Email format: name@domain.com");
         String email = input.next();
-        email =validateEmail(email,input);
+        email = validateEmail(email, input);
         System.out.println("First Name");
         String firstName = input.next();
         System.out.println("Last Name");
         String lastName = input.next();
-        customerService.addCustomer(email,firstName,lastName);
-        System.out.println("Added successfully");
 
-
-
+        try {
+            customerService.addCustomer(email, firstName, lastName);
+            System.out.println("Added successfully");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Failed to add customer: " + e.getMessage());
+        }
     }
 }

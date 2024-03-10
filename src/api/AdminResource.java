@@ -21,17 +21,23 @@ public class AdminResource {
 
         reservationService.addRoom(rooms);
     }
-    public Collection<IRoom> getAllRooms(){
+
+    public Collection<IRoom> getAllRooms() {
         return reservationService.getAllRooms();
     }
 
-    public Collection<Customer> getAllCustomers(){
+    public Collection<Customer> getAllCustomers() {
         return customerService.getAllCustomers();
     }
 
-    public void displayAllReservations(){
+    public void displayAllReservations() {
 
         reservationService.printAllReservation();
+    }
+
+    public boolean roomExists(IRoom room) {
+
+        return reservationService.roomExists(room);
     }
 }
 
